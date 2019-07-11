@@ -1,0 +1,162 @@
+ <!DOCTYPE html>
+ <html>
+ <head>
+ 	<title>李蛋黄NEST挖矿效率信息</title>
+ 	<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+ 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+ </head>
+ <body onload="startInfo()">
+ 	<h4>最后更新时间</h4>
+ 	<p id = "refreshTime"></p>
+ 	<h4>当前使用账号</h4>
+ 	<p id = "addressStr"></p>
+ 	<h4>当前全网Gas均价</h4>
+ 	<p id = "gasPrice"></p>
+ 	<h4>当前借贷合约流程成本</h4>
+ 	<p id = "orderPrice"></p>
+ 	<h4 id = "startBlock">起始区块:</h4>
+ 	<h4 id = "endBlock">结束区块:</h4>
+ 	<h4 id = "had300">前300区块挖矿数:</h4>
+ 	<h4 id = "hadNest">已挖出数量:</h4>
+ 	<h4 id = "hadNestAttenuation">总数衰减:</h4>
+ 	<h4 id = "startAttenuation">跟随衰减界限:</h4>
+ 	<h4 id = "miningLimit">单笔挖矿上限:</h4>
+ 	<h4 id = "6666Attenuatio">6666区块衰减参数:</h4>
+
+ 	<h4 id = "001eth">0.01eth:</h4>
+ 	<h4 id = "01eth">0.1eth:</h4>
+ 	<h4 id = "1eth">1eth:</h4>
+ </body>
+
+ <script type="text/javascript">
+ 	function startInfo(){
+
+		//	链接以太坊
+		if (typeof web3 !== 'undefined') {
+		  web3 = new Web3(web3.currentProvider);
+		} else {
+		  web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/d5e091f7b0e1466583a3c94cd623bc88"));
+		}
+
+		if(!web3.isConnected()) {
+		    console.log("连接失败！！")
+		} else {
+		    console.log("连接成功！！")
+		}
+
+		web3.eth.defaultAccount = '0x8888f1f195afa192cfee860698584c030f4c9db1';
+		//	默认账号
+		document.getElementById("addressStr").innerHTML = web3.eth.defaultAccount;
+		//	gas
+		var gasPrice = web3.eth.gasPrice;
+		document.getElementById("gasPrice").innerHTML = toDe(gasPrice / 1000000000000000000).toString() + " ETH";
+		//	成本
+		document.getElementById("orderPrice").innerHTML = toDe(gasPrice / 1000000000000000000 * 2000000).toString() + " ETH";
+		//	初始区块
+		var latestBlock =  web3.eth.getBlock("latest");
+
+		//	已挖出Nest
+		var nestContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}]).at("0x04abEdA201850aC0124161F037Efd70c74ddC74C");
+		//	已挖出Nest
+		var nestpool = nestContract.balanceOf("0x923f80828663e44e0ffd5eb499686dc1ccc78476");
+		var hadNest = (10000000000000000000000000000 - nestpool) / 1000000000000000000;
+		document.getElementById("hadNest").innerHTML = "已挖出数量:" + web3.toBigNumber(hadNest).toString(10);
+		//	总数衰减参数
+		var attenuationTimes = parseInt(hadNest / 100000000);
+	    document.getElementById("hadNestAttenuation").innerHTML = "总数衰减:" + Math.pow(0.96,attenuationTimes);
+	    //	跟随衰减界限
+	    document.getElementById("startAttenuation").innerHTML = "跟随衰减界限:" + 200000 * Math.pow(0.96,attenuationTimes);
+	    //	单笔挖矿上限
+	    document.getElementById("miningLimit").innerHTML = "单笔挖矿上限:" + 400000 * Math.pow(0.96,attenuationTimes);
+	    //	6666区块衰减
+
+	    document.getElementById("6666Attenuatio").innerHTML = "6666区块衰减参数:" + Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) + "(0.01eth手续费正常挖:" + Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) * 1000 + ")";
+	    
+		//	更新时间
+		document.getElementById("refreshTime").innerHTML = toggleTstamp(new Date().getTime());
+
+		$.ajax({  
+		      url: "http://api.etherscan.io/api?module=account&action=txlistinternal&address=0x1Fe81D3b7e442d86bDb35D99E02c203912B0345e&startblock=" + (latestBlock["number"] - 300) + "&endblock=" + latestBlock["number"] + "&sort=asc&apikey=YourApiKeyToken",  
+		      async: true,  
+		      success: function(data){  
+		      	  document.getElementById("startBlock").innerHTML = "起始区块:" + data["result"][1]["blockNumber"];
+		      	  document.getElementById("endBlock").innerHTML = "结束区块:" + data["result"][data["result"].length - 1]["blockNumber"];
+		      	  var startBlockAmount = 0;
+		      	  var endBlockAmount = 0;
+		      	  var log = web3.eth.getTransactionReceipt(data["result"][1]["hash"]);
+		      	  for (var i = 0; i < log["logs"].length; i++) {
+		      	  	// console.log(log["logs"][i]["topics"]);
+		      	  	if (log["logs"][i]["topics"][0] == "0x13234704f04d332b05aa16e59c04931fad6add3cee4a72177b2852710361993d") {
+		      	  		startBlockAmount = parseInt(log["logs"][i]["data"].substring(64 * 5 + 2,64 * 6 + 2),16);
+		      	  	}
+		      	  }
+
+		      	  var log_end = web3.eth.getTransactionReceipt(data["result"][data["result"].length - 1]["hash"]);
+		      	  for (var i = 0; i < log_end["logs"].length; i++) {
+		      	  	// console.log(log["logs"][i]["topics"]);
+		      	  	if (log_end["logs"][i]["topics"][0] == "0x13234704f04d332b05aa16e59c04931fad6add3cee4a72177b2852710361993d") {
+		      	  		endBlockAmount = parseInt(log_end["logs"][i]["data"].substring(64 * 5 + 2,64 * 6 + 2),16);
+		      	  	}
+		      	  }
+
+		      	  var had300 = (endBlockAmount - startBlockAmount) / 1000000000000000000;
+		      	  document.getElementById("had300").innerHTML = "前300区块挖矿数:" + had300;
+
+		      	  var p1 = 200000 * Math.pow(0.96,attenuationTimes);
+				  var oneP = 1 * Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) * 1000;
+				  var twoP = 10 * Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) * 1000;
+				  var threeP = 100 * Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) * 1000;
+
+		      	  if ((had300 + oneP) < p1) {
+		      	  	document.getElementById("001eth").innerHTML = "0.01eth:" + oneP;
+		      	  } else {
+		      	  	var oneNum = (p1 * oneP) / (had300 + oneP) + (oneP * ((had300 + oneP) - p1) * p1 / ((had300 + oneP) * (had300 + oneP)))
+		      	  	document.getElementById("001eth").innerHTML = "0.01eth:" + oneNum;
+		      	  }
+
+		      	  if ((had300 + twoP) < p1) {
+		      	  	document.getElementById("01eth").innerHTML = "0.1eth:" + twoP;
+		      	  } else {
+		      	  	var oneNum = (p1 * twoP) / (had300 + twoP) + (twoP * ((had300 + twoP) - p1) * p1 / ((had300 + twoP) * (had300 + twoP)))
+		      	  	document.getElementById("01eth").innerHTML = "0.1eth:" + oneNum;
+		      	  }
+
+		      	  if ((had300 + threeP) < p1) {
+		      	  	document.getElementById("1eth").innerHTML = "1eth:" + threeP;
+		      	  } else {
+		      	  	var oneNum = (p1 * threeP) / (had300 + threeP) + (threeP * ((had300 + threeP) - p1) * p1 / ((had300 + threeP) * (had300 + threeP)))
+		      	  	document.getElementById("1eth").innerHTML = "1eth:" + oneNum;
+		      	  }
+
+		      }  
+		});  
+
+		setInterval("location.reload()","60000");
+	}
+	//	转换科学计数法
+    function toDe (val) {
+		  const e = String(val);
+		  let rex = /^([0-9])\.?([0-9]*)e-([0-9])/;
+		  if (!rex.test(e)) return val;
+		  const numArr = e.match(rex);
+		  const n = Number('' + numArr[1] + (numArr[2] || ''));
+		  const num = '0.' + String(Math.pow(10, Number(numArr[3]) - 1)).substr(1) + n;
+		  return num.replace(/0*$/, '') ;
+	}	
+	//	转换时间戳
+	function toggleTstamp(timestamp){
+		/*1.重写了toLocaleString方法*/
+		Date.prototype.toLocaleString = function() {
+		          return this.getFullYear() + "年" + 
+		          (this.getMonth() + 1) + "月" + 
+		          this.getDate() + "日 " 
+		          + this.getHours() + "点"
+		          + this.getMinutes() + "分"
+		          + this.getSeconds() + "秒";
+		}; 
+		var timestring=new Date(timestamp);/*传入毫秒数返回东八区中国标准时间*/
+		return timestring.toLocaleString();
+	}
+
+ </script>
+ </html>
