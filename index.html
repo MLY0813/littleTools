@@ -2,7 +2,8 @@
  <html>
  <head>
  	<title>李蛋黄NEST挖矿效率信息</title>
- 	<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+ 	<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.0/dist/web3.min.js"></script>
+ 	<script src="http://mikemcl.github.io/bignumber.js"></script>
  	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
  </head>
  <body onload="startInfo()">
@@ -35,64 +36,72 @@
 		if (typeof web3 !== 'undefined') {
 		  web3 = new Web3(web3.currentProvider);
 		} else {
-		  web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/d5e091f7b0e1466583a3c94cd623bc88"));
+
+		  web3 = new Web3(Web3.givenProvider || 'https://mainnet.infura.io/v3/d5e091f7b0e1466583a3c94cd623bc88');
 		}
 
-		if(!web3.isConnected()) {
-		    console.log("连接失败！！")
-		} else {
-		    console.log("连接成功！！")
-		}
+		// if(!web3.isConnected()) {
+		//     console.log("连接失败！！")
+		// } else {
+		//     console.log("连接成功！！")
+		// }
 
 		web3.eth.defaultAccount = '0x8888f1f195afa192cfee860698584c030f4c9db1';
 		//	默认账号
 		document.getElementById("addressStr").innerHTML = web3.eth.defaultAccount;
 		//	gas
-		var gasPrice = web3.eth.gasPrice;
-		document.getElementById("gasPrice").innerHTML = toDe(gasPrice / 1000000000000000000).toString() + " ETH";
+		web3.eth.getGasPrice().then(function(gasPrice) {
+			document.getElementById("gasPrice").innerHTML = toDe(gasPrice / 1000000000000000000).toString() + " ETH";
 		//	成本
 		document.getElementById("orderPrice").innerHTML = toDe(gasPrice / 1000000000000000000 * 2000000).toString() + " ETH";
+		})
+		
 		//	初始区块
-		var latestBlock =  web3.eth.getBlock("latest");
+		web3.eth.getBlock("latest").then(function (value) {
+			console.log(value["number"]);
+			var latestBlock = value;
 
+
+			//	已挖出Nest
+		var nestContract = new web3.eth.Contract([{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}], "0x04abEdA201850aC0124161F037Efd70c74ddC74C");
 		//	已挖出Nest
-		var nestContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}]).at("0x04abEdA201850aC0124161F037Efd70c74ddC74C");
-		//	已挖出Nest
-		var nestpool = nestContract.balanceOf("0x923f80828663e44e0ffd5eb499686dc1ccc78476");
-		var hadNest = (10000000000000000000000000000 - nestpool) / 1000000000000000000;
-		document.getElementById("hadNest").innerHTML = "已挖出数量:" + web3.toBigNumber(hadNest).toString(10);
-		//	总数衰减参数
-		var attenuationTimes = parseInt(hadNest / 100000000);
-	    document.getElementById("hadNestAttenuation").innerHTML = "总数衰减:" + Math.pow(0.96,attenuationTimes);
-	    //	跟随衰减界限
-	    document.getElementById("startAttenuation").innerHTML = "跟随衰减界限:" + 200000 * Math.pow(0.96,attenuationTimes);
-	    //	单笔挖矿上限
-	    document.getElementById("miningLimit").innerHTML = "单笔挖矿上限:" + 400000 * Math.pow(0.96,attenuationTimes);
-	    //	6666区块衰减
+
+		var nestpool = nestContract.methods.balanceOf("0x923f80828663e44e0ffd5eb499686dc1ccc78476").call().then(function(value) {
+			var hadNest = (10000000000000000000000000000 - value) / 1000000000000000000;
+			document.getElementById("hadNest").innerHTML = "已挖出数量:" + new web3.utils.BN(hadNest).toString(10);
+			//	总数衰减参数
+			var attenuationTimes = parseInt(hadNest / 100000000);
+		    document.getElementById("hadNestAttenuation").innerHTML = "总数衰减:" + Math.pow(0.96,attenuationTimes);
+		    //	跟随衰减界限
+		    document.getElementById("startAttenuation").innerHTML = "跟随衰减界限:" + 200000 * Math.pow(0.96,attenuationTimes);
+		    //	单笔挖矿上限
+		    document.getElementById("miningLimit").innerHTML = "单笔挖矿上限:" + 400000 * Math.pow(0.96,attenuationTimes);
+		    //	6666区块衰减
 
 	    document.getElementById("6666Attenuatio").innerHTML = "6666区块衰减参数:" + Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) + "(0.01eth手续费正常挖:" + Math.pow(0.999,parseInt((latestBlock["number"] - 6000000) / 6666)) * 1000 + ")";
 	    
 		//	更新时间
 		document.getElementById("refreshTime").innerHTML = toggleTstamp(new Date().getTime());
-
 		$.ajax({  
-		      url: "http://api.etherscan.io/api?module=account&action=txlistinternal&address=0x1Fe81D3b7e442d86bDb35D99E02c203912B0345e&startblock=" + (latestBlock["number"] - 300) + "&endblock=" + latestBlock["number"] + "&sort=asc&apikey=YourApiKeyToken",  
+		      url: "https://api.etherscan.io/api?module=account&action=txlistinternal&address=0x1Fe81D3b7e442d86bDb35D99E02c203912B0345e&startblock=" + (latestBlock["number"] - 300) + "&endblock=" + latestBlock["number"] + "&sort=asc&apikey=YourApiKeyToken",  
 		      async: true,  
 		      success: function(data){  
 		      	  document.getElementById("startBlock").innerHTML = "起始区块:" + data["result"][1]["blockNumber"];
 		      	  document.getElementById("endBlock").innerHTML = "结束区块:" + data["result"][data["result"].length - 1]["blockNumber"];
 		      	  var startBlockAmount = 0;
 		      	  var endBlockAmount = 0;
-		      	  var log = web3.eth.getTransactionReceipt(data["result"][1]["hash"]);
-		      	  for (var i = 0; i < log["logs"].length; i++) {
+		      	  var logPro = web3.eth.getTransactionReceipt(data["result"][1]["hash"]);
+		      	  logPro.then(function (log) {
+		      	  		for (var i = 0; i < log["logs"].length; i++) {
 		      	  	// console.log(log["logs"][i]["topics"]);
 		      	  	if (log["logs"][i]["topics"][0] == "0x13234704f04d332b05aa16e59c04931fad6add3cee4a72177b2852710361993d") {
 		      	  		startBlockAmount = parseInt(log["logs"][i]["data"].substring(64 * 5 + 2,64 * 6 + 2),16);
 		      	  	}
 		      	  }
 
-		      	  var log_end = web3.eth.getTransactionReceipt(data["result"][data["result"].length - 1]["hash"]);
-		      	  for (var i = 0; i < log_end["logs"].length; i++) {
+		      	  var logendPro = web3.eth.getTransactionReceipt(data["result"][data["result"].length - 1]["hash"]);
+		      	  logendPro.then(function(log_end) {
+		      	  		for (var i = 0; i < log_end["logs"].length; i++) {
 		      	  	// console.log(log["logs"][i]["topics"]);
 		      	  	if (log_end["logs"][i]["topics"][0] == "0x13234704f04d332b05aa16e59c04931fad6add3cee4a72177b2852710361993d") {
 		      	  		endBlockAmount = parseInt(log_end["logs"][i]["data"].substring(64 * 5 + 2,64 * 6 + 2),16);
@@ -127,11 +136,24 @@
 		      	  	var oneNum = (p1 * threeP) / (had300 + threeP) + (threeP * ((had300 + threeP) - p1) * p1 / ((had300 + threeP) * (had300 + threeP)))
 		      	  	document.getElementById("1eth").innerHTML = "1eth:" + oneNum;
 		      	  }
+		      	  })
+		      	  
+		      	  })
+		      	  
 
 		      }  
 		});  
+		});
+		
+		
+		
+	    
+	    
 
 		setInterval("location.reload()","60000");
+		});
+		
+		
 	}
 	//	转换科学计数法
     function toDe (val) {
